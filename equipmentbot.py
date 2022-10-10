@@ -18,7 +18,7 @@ def handle_text(message):
     equipment = eq["equipment"]
     parametr = eq["parametr"]
     note = eq["note"]
-    strmessage = f"** Название оборудования:** {equipment} \n** Параметры:** {parametr} \n ** Описание:** {note}"
+    strmessage = f"** Название оборудования: ** {equipment} \n** Параметры:** {parametr} \n ** Описание:** {note}"
 
     bot.send_message(message.chat.id, strmessage)
 
