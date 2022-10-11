@@ -3,7 +3,6 @@ import telebot
 import get_equipment
 from config import TOKEN
 
-TOKEN2 = '5368872375:AAEvUpJg5M8f_NF8LxB2SqrzRJEx2QfSIdQ'
 bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=["start"])
