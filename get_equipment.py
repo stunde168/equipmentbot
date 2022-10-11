@@ -6,6 +6,7 @@ def get_equipment(id: int):
         history=id
     )
     r = requests.get(url, params=params )
+    #    if r.status_code == 404
     r.encoding = 'utf-8-sig'
     data = r.json() # Check the JSON Response Content documentation below
     eq = data[0]
@@ -14,6 +15,22 @@ def get_equipment(id: int):
     # parametr = eq["parametr"]
     # note = eq["note"]
     return eq
+
+def get_room(id_room: int):
+    url='http://roach/maint/frio/frio_equipment.php'
+    params = dict(
+        room=id_room
+    )
+    r = requests.get(url, params=params )
+    #    if r.status_code == 404
+    r.encoding = 'utf-8-sig'
+    data = r.json() # Check the JSON Response Content documentation below
+    # id = eq["id"]
+    # equipment = eq["equipment"]
+    return data
+
+
+
 
 def main():
     eq = get_equipment(0)
