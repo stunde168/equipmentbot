@@ -36,36 +36,37 @@ def sendbuttons(call):
 
 #@bot.message_handler(content_types=["text"])
 def process_room_step(m):
-
-    room = int(m.text)
-    eqs = get_equipment.get_room(room)
-    strmessage=''
-    for eq in eqs:
-        id = eq["id"]
-        equipment = eq["equipment"]
-        strmessage = strmessage + f"{id} : {equipment}\n"
     if not is_int(m.text) :
         return bot.send_message(m.chat.id, "Введите номер компрессорной")
-    bot.send_message(m.chat.id, strmessage)
+    else :
+        room = int(m.text)
+        eqs = get_equipment.get_room(room)
+        strmessage=''
+        for eq in eqs:
+            id = eq["id"]
+            equipment = eq["equipment"]
+            strmessage = strmessage + f"{id} : {equipment}\n"
+        bot.send_message(m.chat.id, strmessage)
 
 #@bot.message_handler(content_types=["text"])
 def process_equipment_step(m): 
-    id = int(m.text)
-    eq = get_equipment.get_equipment(id)
-    id = eq["id"]
-    equipment = eq["equipment"]
-    parametr = eq["parametr"]
-    note = eq["note"]
-    strmessage = f"НАЗВАНИЕ ОБОРУДОВАНИЯ: {equipment} \nПАРАМЕТРЫ: {parametr} \nОПИСАНИЕ: {note}"
-    bot.send_message(m.chat.id, strmessage)
+    if not is_int(m.text) :
+        return bot.send_message(m.chat.id, "Введите номер оборудования")
+    else:
+        id = int(m.text)
+        eq = get_equipment.get_equipment(id)
+        id = eq["id"]
+        equipment = eq["equipment"]
+        parametr = eq["parametr"]
+        note = eq["note"]
+        strmessage = f"НАЗВАНИЕ ОБОРУДОВАНИЯ: {equipment} \nПАРАМЕТРЫ: {parametr} \nОПИСАНИЕ: {note}"
+        bot.send_message(m.chat.id, strmessage)
 
 @bot.message_handler(content_types=["text"])
 def handle_text_step0(m):
     print(f'message.chat.id={m.chat.id} You write {m.text}')
     if m.text == "t" or m.text == "T" or m.text == "test":
         return send_buttons_step0(m)
-    if not is_int(m.text) :
-        return bot.send_message(m.chat.id, "Введите номер оборудования")
     process_equipment_step(m)
 
 
