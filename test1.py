@@ -33,5 +33,21 @@ class EquipmentTest(unittest.TestCase):
         self.assertFalse(rm)
 
 
+    def test_get_listfiles(self):
+        id = 767
+        listfiles = get_equipment.get_listfiles(id)
+        self.assertEqual(len(listfiles), 2)
+
+        self.assertIn("ТРВ_компрессор_шильда_200299400701_27744.jpg", listfiles) 
+        self.assertIn("Шильда_осушитель_К18_IMG_20211224_120934_.jpg", listfiles) 
+        
+    def test_get_nolistfiles(self):
+        id = 143
+        listfiles = get_equipment.get_listfiles(id)
+        self.assertEqual(len(listfiles), 0)
+        
+
+
+
 if __name__ == "__main__":
     unittest.main()
