@@ -15,7 +15,7 @@ def is_int(str):
 @bot.message_handler(commands=["start"])
 def start(m, res=False):
     print(f"received message from m.chat.id={m.chat.id}")
-    bot.send_message(m.chat.id, 'Холодильное оборудование ВЛМК\n (тип поиска : введите t')
+    bot.send_message(m.chat.id, f'Здравствуй, {m.first_name}. Для поиска по холодильному оборудованию ВЛМК введите t или номер оборудования')
 
 @bot.message_handler(commands=["id"])
 def handler_id(m, res=False):
