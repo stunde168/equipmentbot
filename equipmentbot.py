@@ -21,6 +21,13 @@ def start(m, res=False):
     print(f"received message from m.chat.id={m.chat.id}")
     bot.send_message(m.chat.id, 'Холодильное оборудование ВЛМК\n (тип поиска : введите t')
 
+@bot.message_handler(commands=["id"])
+def handler_id(m, res=False):
+    print(f"received message from m.chat.id={m.chat.id}")
+    # m.
+    bot.send_message(m.chat.id, 'введена команда /id')
+
+
 def send_buttons_step0(m):
     menu1 = telebot.types.InlineKeyboardMarkup()
     menu1.add(telebot.types.InlineKeyboardButton(text = 'Поиск по № компрессорной', callback_data ='room'))
