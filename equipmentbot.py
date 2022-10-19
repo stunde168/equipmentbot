@@ -23,9 +23,19 @@ def start(m, res=False):
 
 @bot.message_handler(commands=["id"])
 def handler_id(m, res=False):
-    print(f"received message from m.chat.id={m.chat.id}")
-    # m.
-    bot.send_message(m.chat.id, 'введена команда /id')
+    process_equipment_step(m)
+
+@bot.message_handler(commands=["room"])
+def handler_room(m, res=False):
+    process_room_step(m)
+
+@bot.message_handler(commands=["docs"])
+def handler_docs(m, res=False):
+    process_equipment_docs_step(m)
+
+@bot.message_handler(commands=["file"])
+def handler_file(m, res=False):
+     bot.send_message(m.chat.id, 'введена команда /file')
 
 
 def send_buttons_step0(m):
@@ -45,7 +55,6 @@ def sendbuttons(call):
         bot.register_next_step_handler(msg, process_equipment_step)
     elif call.data == 'docs':
         msg = bot.send_message(call.message.chat.id, "Введи номер оборудования - документация")
-
         bot.register_next_step_handler(msg, process_equipment_docs_step)
     else:
         msg = bot.send_message(call.message.chat.id, "Ошибка бота 1")
@@ -95,10 +104,10 @@ def process_equipment_docs_step(m):
 
 @bot.message_handler(content_types=["text"])
 def handle_text_step0(m):
-    print(f'message.chat.id={m.chat.id} {chat_names.get(m.chat.id)} message_handler. You write {m.text}')
+    print(f'message.chat.id={m.chat.id} {m.first_name} message_handler. You write {m.text}')
     if not greeteing_sent.get(m.chat.id):     
         greeteing_sent[m.chat.id] = True
-        name = chat_names.get(m.chat.id)
+        name = m.first_name
         greetingmessage = f'Здравствуй, {name}. Бот опять работает' if name  != '' else 'Бот опять работает'        
         bot.send_message(m.chat.id, greetingmessage)
 
@@ -106,11 +115,9 @@ def handle_text_step0(m):
         return send_buttons_step0(m)
     process_equipment_step(m)
 
-
 def main():
     print("bot starting")
     bot.polling(none_stop=True, interval=0)
 
 if __name__ == "__main__":
     main()
-
