@@ -1,3 +1,4 @@
+from tkinter.messagebox import NO
 import requests
 
 def get_equipment(id: int):
@@ -42,6 +43,16 @@ def get_listfiles(id: int):
     return dict()
 
 
+def get_file(id, filenumber):
+    files = get_listfiles(id)
+    keys = files.keys()
+    if len(keys) == 0 :
+        return None
+    if filenumber < len(keys) :
+        return None
+    key = keys[filenumber]
+    filepath = files[key]
+    # todo later: download file from php at path 'filepath'
 
 
 def main():
