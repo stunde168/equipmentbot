@@ -1,13 +1,13 @@
 from multiprocessing import Value
 import telebot
 import get_equipment
-from config import TOKEN
+from config import TOKEN, TOKENSCADA
 
-chat_names = {5320223505 : "Сергей", 1041976546 : "Алексей"}
-greeteing_sent = {5320223505 : False, 1041976546 : False}
+# еще про состояние можно прочитать на https://github.com/eternnoir/pyTelegramBotAPI/blob/master/examples/custom_states.py
 
+chat_states = {}
 
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot(TOKENSCADA)
 
 def is_int(str):
     try:
@@ -18,51 +18,99 @@ def is_int(str):
 
 @bot.message_handler(commands=["start"])
 def start(m, res=False):
-    print(f"received message from m.chat.id={m.chat.id}")
-    bot.send_message(m.chat.id, f'Здравствуй, {m.first_name}. Для поиска по холодильному оборудованию ВЛМК введите t или номер оборудования')
+    print(f"Начинаем чат с {m.chat.id=}")
+    # m.from_user.first_name id last_name username
+    bot.send_message(m.chat.id, f'👋 Здравствуй, {m.from_user.username}.')    
+    handle_text_default(m)
 
 @bot.message_handler(commands=["id"])
 def handler_id(m, res=False):
-    process_equipment_step(m)
+    bot.send_message(m.chat.id, f'Для просмотра карточки оборудования введите номер обрудования')    
+    bot.register_next_step_handler(m, equipment_inputid_handler)    
 
 @bot.message_handler(commands=["room"])
 def handler_room(m, res=False):
-    process_room_step(m)
+    bot.send_message(m.chat.id, f'Для вывода списка оборудования введите номер компрессорной')    
+    bot.register_next_step_handler(m, room_inputroom_handler)
 
 @bot.message_handler(commands=["docs"])
 def handler_docs(m, res=False):
-    process_equipment_docs_step(m)
+    bot.send_message(m.chat.id, f'Для вывода документации введите номер оборудования')    
+    bot.register_next_step_handler(m, docs_inputid_handler)
 
 @bot.message_handler(commands=["file"])
 def handler_file(m, res=False):
-     bot.send_message(m.chat.id, 'введена команда /file')
+    bot.send_message(m.chat.id, 'введена команда /file - она будет добавлена позже')
 
+@bot.message_handler(commands=["t", "test"])
+def handler_test(m, res=False):
+    markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=False, resize_keyboard=True)
+    btn0 = telebot.types.KeyboardButton('/id')
+    btn1 = telebot.types.KeyboardButton('/room')
+    btn2 = telebot.types.KeyboardButton('/docs')
+    btn3 = telebot.types.KeyboardButton('/file')
+    btncancel = telebot.types.KeyboardButton('/cancel')
+    markup.add(btn0, btn1, btn2, btn3, btncancel)
+    msg = bot.send_message(m.chat.id, 'Клавиатура добавлена. Что хотите сделать?',
+                           reply_markup=markup)
+    # bot.register_next_step_handler(msg.msg, handler_switch)
 
-def send_buttons_step0(m):
-    menu1 = telebot.types.InlineKeyboardMarkup()
-    menu1.add(telebot.types.InlineKeyboardButton(text = 'Поиск по № компрессорной', callback_data ='room'))
-    menu1.add(telebot.types.InlineKeyboardButton(text = 'По № оборудования"', callback_data ='id'))
-    menu1.add(telebot.types.InlineKeyboardButton(text = 'Документация по № оборудования"', callback_data ='docs'))
-    msg = bot.send_message(m.chat.id, text ='Выбери тип поиска', reply_markup = menu1)
+def is_canceled(m):
+    text = m.text
+    return "/cancel" in text
 
-@bot.callback_query_handler(func=lambda call: True)
-def sendbuttons(call):
-    if call.data == 'room':
-        msg = bot.send_message(call.message.chat.id, "Введи номер компрессорной")
-        bot.register_next_step_handler(msg, process_room_step)
-    elif call.data == 'id':
-        msg = bot.send_message(call.message.chat.id, "Введи номер оборудования")
-        bot.register_next_step_handler(msg, process_equipment_step)
-    elif call.data == 'docs':
-        msg = bot.send_message(call.message.chat.id, "Введи номер оборудования - документация")
-        bot.register_next_step_handler(msg, process_equipment_docs_step)
-    else:
-        msg = bot.send_message(call.message.chat.id, "Ошибка бота 1")
+@bot.message_handler(commands=["cancel"])
+def handler_cancel(m, res=False):
+    markup = telebot.types.ReplyKeyboardRemove(selective=False)    
+    bot.send_message(m.chat.id, 'текущая операция отменена', reply_markup=markup)
+    handle_text_default(m)
+    
 
-def process_room_step(m):
+# def send_buttons_step0(m):
+#     menu1 = telebot.types.InlineKeyboardMarkup()
+#     menu1.add(telebot.types.InlineKeyboardButton(text = '№ компрессорной', callback_data ='room'))
+#     menu1.add(telebot.types.InlineKeyboardButton(text = 'Карточка', callback_data ='id'))
+#     menu1.add(telebot.types.InlineKeyboardButton(text = 'Документация', callback_data ='docs'))
+#     msg = bot.send_message(m.chat.id, text ='Выбери тип поиска: список оборудования по номеру компрессорной, карточка оборудования по номеру оборудования, документация по номеру оборудования', reply_markup = menu1)
+
+# @bot.callback_query_handler(func=lambda call: True)
+# def sendbuttons(call):
+#     if call.data == 'room':
+#         msg = bot.send_message(call.message.chat.id, "Введи номер компрессорной")
+#         bot.register_next_step_handler(msg, process_room_step)
+#     elif call.data == 'id':
+#         msg = bot.send_message(call.message.chat.id, "Введи номер оборудования")
+#         bot.register_next_step_handler(msg, process_equipment_step)
+#     elif call.data == 'docs':
+#         msg = bot.send_message(call.message.chat.id, "Введи номер оборудования - документация")
+#         bot.register_next_step_handler(msg, docs_handler)
+#     else:
+#         msg = bot.send_message(call.message.chat.id, "Ошибка бота 1")
+
+def equipment_inputid_handler(m): 
+    if is_canceled(m):
+        return handler_cancel(m)
+    if not is_int(m.text):
+        msg = bot.send_message(m.chat.id, f"Введенный текст не является номером оборудования. Введите номер оборудования, например 144")
+        bot.register_next_step_handler(msg, equipment_inputid_handler)
+        return
+
+    id = int(m.text)
+    eq = get_equipment.get_equipment(id)
+    id = eq["id"]
+    equipment = eq["equipment"]
+    parametr = eq["parametr"]
+    note = eq["note"]
+    strmessage = f"НАЗВАНИЕ ОБОРУДОВАНИЯ: {equipment} \nПАРАМЕТРЫ: {parametr} \nОПИСАНИЕ: {note}"
+    msg = bot.send_message(m.chat.id, strmessage)
+    bot.register_next_step_handler(msg, equipment_inputid_handler)
+
+def room_inputroom_handler(m):
+    if is_canceled(m):
+        return handler_cancel(m)
     if not is_int(m.text) :
-        msg = bot.send_message(m.chat.id, "Введите номер компрессорной")
-        bot.register_next_step_handler(msg, process_room_step)
+        msg = bot.send_message(m.chat.id, "Все-таки введите номер компрессорной")
+        bot.register_next_step_handler(msg, room_inputroom_handler)
         return
    
     room = int(m.text)
@@ -72,48 +120,65 @@ def process_room_step(m):
         id = eq["id"]
         equipment = eq["equipment"]
         strmessage = strmessage + f"{id} : {equipment}\n"
-    bot.send_message(m.chat.id, strmessage)
+    msg = bot.send_message(m.chat.id, strmessage)
+    bot.register_next_step_handler(msg, room_inputroom_handler)
 
-def process_equipment_step(m): 
-    if not is_int(m.text) :
-        return bot.send_message(m.chat.id, "Введите номер оборудования")
-
-    id = int(m.text)
-    eq = get_equipment.get_equipment(id)
-    id = eq["id"]
-    equipment = eq["equipment"]
-    parametr = eq["parametr"]
-    note = eq["note"]
-    strmessage = f"НАЗВАНИЕ ОБОРУДОВАНИЯ: {equipment} \nПАРАМЕТРЫ: {parametr} \nОПИСАНИЕ: {note}"
-    bot.send_message(m.chat.id, strmessage)
-
-def process_equipment_docs_step(m): 
+def docs_inputid_handler(m): 
+    if is_canceled(m):
+        return handler_cancel(m)
     if not is_int(m.text) :
         msg = bot.send_message(m.chat.id, "Введите номер оборудования - документация")
-        bot.register_next_step_handler(msg, process_equipment_docs_step)
+        bot.register_next_step_handler(msg, docs_inputid_handler)
+        return
 
     id = int(m.text)
     listfiles = get_equipment.get_listfiles(id)
     print(f'{listfiles=}')
     if len(listfiles) == 0 :
-        return bot.send_message(m.chat.id, "ДОКУМЕНТАЦИЯ ОТСУТСТВУЕТ")    
+        msg = bot.send_message(m.chat.id, f"Документация по оборудованию №{id} отсутствует")    
+        bot.register_next_step_handler(msg, docs_inputid_handler)
+        return
+
+    chat_states[m.chat.id] = id
+
     keys = "\n".join(list(listfiles.keys()))
     strmessage = f"{keys}"
-    bot.send_message(m.chat.id, strmessage)
+    msg = bot.send_message(m.chat.id, strmessage)
+    msg = bot.send_message(m.chat.id, "Введите номер файла")
+    bot.register_next_step_handler(msg, file_inputnumber_handler)
+
+def file_inputnumber_handler(m): 
+    if is_canceled(m):
+        return handler_cancel(m)
+    if not is_int(m.text) :
+        msg = bot.send_message(m.chat.id, f"Введите номер файла для оборудования №enterid")
+        bot.register_next_step_handler(msg, file_inputnumber_handler)
+        return
+
+    id = chat_states.get(m.chat.id)
+
+    number = int(m.text)
+    strmessage = f"запрашиваем файл {number} для оборудования №{id}"
+    msg = bot.send_message(m.chat.id, strmessage)
+
+    (filename, file) = get_equipment.get_file(id, number)
+    print(f'{id=} {number=}')
+    if file == None:    
+        msg = bot.send_message(m.chat.id, f"Файл {number} для оборудования №{id} отсутствует")    
+        bot.register_next_step_handler(msg, file_inputnumber_handler)
+        return
+
+    strmessage = f"Прикрепляем файл {number} для оборудования №{id}"
+    msg = bot.send_message(m.chat.id, strmessage)
+
+    msg = bot.send_document(m.chat.id, file, caption=filename)
+    bot.register_next_step_handler(msg, file_inputnumber_handler)
 
 
 @bot.message_handler(content_types=["text"])
-def handle_text_step0(m):
-    print(f'message.chat.id={m.chat.id} {m.first_name} message_handler. You write {m.text}')
-    if not greeteing_sent.get(m.chat.id):     
-        greeteing_sent[m.chat.id] = True
-        name = m.first_name
-        greetingmessage = f'Здравствуй, {name}. Бот опять работает' if name  != '' else 'Бот опять работает'        
-        bot.send_message(m.chat.id, greetingmessage)
-
-    if m.text == "t" or m.text == "T" or m.text == "test" or m.text == 'т' or m.text == 'Т':
-        return send_buttons_step0(m)
-    process_equipment_step(m)
+def handle_text_default(m):
+    print(f'message.chat.id={m.chat.id} {m.from_user.username} message_handler. You write {m.text}')
+    bot.send_message(m.chat.id, 'Для работы с холодильным оборудованием ВЛМК выбери одну из следующих команд: \n/id - просмотр карточки по номеру оборудования \n/room - список оборудования по номеру компрессорной \n/docs - вывод документации по номеру оборудования \n/file - просмотр файла документации по номеру оборудования \n/help - для вывода данного сообщения \n/cancel - отмена выбранной команды \n/test - тоже для чего-то')
 
 def main():
     print("bot starting")
