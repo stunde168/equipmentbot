@@ -188,7 +188,7 @@ def file_inputnumber_handler(m) -> None:
 
     number = int(m.text)
     if number < 0 or number >= len(newlist):
-        msg = bot.send_message(m.chat.id, f"Запрос файла документации для оборудования №{id}. Введенный номер вне диапазона списка файлов. Введите число от 0 до {len(listfiles) - 1}.Для отмены введите /cancel")
+        msg = bot.send_message(m.chat.id, f"Запрос файла документации для оборудования №{id}. Введенный номер вне диапазона списка файлов. Введите число от 0 до {len(newlist) - 1}.Для отмены введите /cancel")
         bot.register_next_step_handler(msg, file_inputnumber_handler)
         return
 
@@ -199,7 +199,7 @@ def file_inputnumber_handler(m) -> None:
     strmessage = f"запрашиваем файл {number}: {shortfilename} для оборудования №{id}"
     msg = bot.send_message(m.chat.id, strmessage)
     
-    file = get_equipment.get_file(fullfilename)
+    file = get_equipment.get_file(shortfilename, fullfilename)
 
     print(f'{m.chat.id} Попытка скачать {id=} файл №{number} {shortfilename} по адресу {fullfilename}')
     if file == None or not file.ok:
@@ -210,7 +210,7 @@ def file_inputnumber_handler(m) -> None:
     strmessage = f"Прикрепляем файл {number} для оборудования №{id}"
     msg = bot.send_message(m.chat.id, strmessage)
 
-    msg = bot.send_document(m.chat.id, file.content, caption=shortfilename)
+    msg = bot.send_document(m.chat.id, (shortfilename, file.content), caption=shortfilename)
     #msg = bot.send_document(m.chat.id, file.content, caption="qqq.jpg")
     bot.register_next_step_handler(msg, file_inputnumber_handler)
 

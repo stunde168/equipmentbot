@@ -49,7 +49,6 @@ class EquipmentTest(unittest.TestCase):
         
     def test_map_dict2list(self):
         listfiles = {'file1': 'fullfile1', 'file2': 'fullfile2', 'file3': 'fullfile3'}
-        # i = 0
         newlist = list(map(lambda item: (item[0], item[1]), listfiles.items()))
         i0 = 0
         i1 = 1
@@ -65,10 +64,6 @@ class EquipmentTest(unittest.TestCase):
         filename = '//192.168.10.13/Frio/ABAC/DRY_250_(A7)/767/Шильда_осушитель_К18_IMG_20211224_120934_.jpg'
         file = get_equipment.get_file(filename)
         self.assertIsNotNone(file)
-        # f = open("qqqq.jpg", "wb")
-        # f.write(file.content)
-        # f.close()
-
 
 if __name__ == "__main__":
     unittest.main()
