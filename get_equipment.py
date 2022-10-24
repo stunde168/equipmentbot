@@ -1,5 +1,6 @@
 import requests
-
+#import urllib.request
+import requests
 from config import SERVER_ROACH
 
 def get_server():
@@ -46,13 +47,24 @@ def get_listfiles(id: int):
         return data
     return dict()
 
-def get_file(id: int, number: int): #(filename, file)
+def get_file(fullfilename: str): # -> file
     # todo: добавить сюда выкачку файла
     # with open(file, 'rb') as tmp:
     # obj = BytesIO(tmp.read())
     # obj.name = '1.txt'
-    return (None, None)
-    return ('filenamenotfound', '')
+    myfullfilename = 'http:' + fullfilename if fullfilename.startswith('//') else fullfilename
+
+    r = requests.get(myfullfilename)
+    if r.ok:        
+        # file = urllib.request.urlopen(myfullfilename).read()
+        return r
+    else:
+        return None
+    # f = open("qqqq.png", "wb")
+    # f.write(logo2)
+    # f.close()
+
+    
 
 def main():
     eq = get_equipment(0)

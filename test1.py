@@ -1,4 +1,5 @@
 import unittest
+
 import get_equipment
 import equipmentbot
 
@@ -46,7 +47,27 @@ class EquipmentTest(unittest.TestCase):
         listfiles = get_equipment.get_listfiles(id)
         self.assertEqual(len(listfiles), 0)
         
+    def test_map_dict2list(self):
+        listfiles = {'file1': 'fullfile1', 'file2': 'fullfile2', 'file3': 'fullfile3'}
+        # i = 0
+        newlist = list(map(lambda item: (item[0], item[1]), listfiles.items()))
+        i0 = 0
+        i1 = 1
+        i2 = 2        
+        item0 = newlist[i0]
+        item2 = newlist[i2]
+        self.assertEqual(item0[0], 'file1')
+        self.assertEqual(item0[1], 'fullfile1')
+        self.assertEqual(item2[0], 'file3')
+        self.assertEqual(item2[1], 'fullfile3')
 
+    def test_downloadfile(self):
+        filename = '//192.168.10.13/Frio/ABAC/DRY_250_(A7)/767/Шильда_осушитель_К18_IMG_20211224_120934_.jpg'
+        file = get_equipment.get_file(filename)
+        self.assertIsNotNone(file)
+        # f = open("qqqq.jpg", "wb")
+        # f.write(file.content)
+        # f.close()
 
 
 if __name__ == "__main__":
