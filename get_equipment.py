@@ -1,8 +1,13 @@
 from tkinter.messagebox import NO
 import requests
 
+from config import SERVER_ROACH
+
+def get_server():
+    return SERVER_ROACH
+
 def get_equipment(id: int):
-    url='http://roach/maint/frio/frio_equipment.php'
+    url = f'http://{get_server()}/maint/frio/frio_equipment.php'
     params = dict(
         id=id
     )
@@ -18,7 +23,7 @@ def get_equipment(id: int):
     return eq
 
 def get_room(id_room: int):
-    url='http://roach/maint/frio/frio_equipment.php'
+    url = f'http://{get_server()}/maint/frio/frio_equipment.php'
     params = dict(
         room=id_room
     )
@@ -31,7 +36,7 @@ def get_room(id_room: int):
     return data
 
 def get_listfiles(id: int):
-    url='http://roach/maint/frio/frio_equipment_files.php'
+    url = f'http://{get_server()}/maint/frio/frio_equipment_files.php'
     params = dict(
         id=id
     )
@@ -42,17 +47,28 @@ def get_listfiles(id: int):
         return data
     return dict()
 
+def get_file(id: int, number: int): #(filename, file)
+    """
+    Функция получения списка файлов
+    id: необходим
+    """
+    # todo: добавить сюда выкачку файла
+    # with open(file, 'rb') as tmp:
+    # obj = BytesIO(tmp.read())
+    # obj.name = '1.txt'
 
-def get_file(id, filenumber):
     files = get_listfiles(id)
     keys = files.keys()
     if len(keys) == 0 :
         return None
-    if filenumber < len(keys) :
+    if number < len(keys) :
         return None
-    key = keys[filenumber]
+    key = keys[number]
     filepath = files[key]
     # todo later: download file from php at path 'filepath'
+
+    return (None, None)
+    return ('filenamenotfound', '')
 
 
 def main():
