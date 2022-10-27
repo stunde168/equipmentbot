@@ -156,7 +156,7 @@ def docs_inputid_handler(m):
 
     id = int(m.text)
     listfiles = get_equipment.get_listfiles(id)
-    print(f'{listfiles=}')
+    #print(f'{listfiles=}')
     if listfiles == None or len(listfiles) == 0 :
         msg = bot.send_message(m.chat.id, f"Документация по оборудованию №{id} отсутствует")    
         bot.register_next_step_handler(msg, docs_inputid_handler)
@@ -197,11 +197,11 @@ def file_inputnumber_handler(m) -> None:
     fullfilename = pair[1]
 
     strmessage = f"запрашиваем файл {number}: {shortfilename} для оборудования №{id}"
-    msg = bot.send_message(m.chat.id, strmessage)
+    # msg = bot.send_message(m.chat.id, strmessage)
     
-    file = get_equipment.get_file(shortfilename, fullfilename)
+    file = get_equipment.get_file(fullfilename)
 
-    print(f'{m.chat.id} Попытка скачать {id=} файл №{number} {shortfilename} по адресу {fullfilename}')
+    # print(f'{m.chat.id} Попытка скачать {id=} файл №{number} {shortfilename} по адресу {fullfilename}')
     if file == None or not file.ok:
         msg = bot.send_message(m.chat.id, f"Файл {number} для оборудования №{id} отсутствует")    
         bot.register_next_step_handler(msg, file_inputnumber_handler)
