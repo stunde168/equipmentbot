@@ -1,6 +1,8 @@
 from tkinter.messagebox import NO
+from fileinput import filename
 import requests
-
+#import urllib.request
+import requests
 from config import SERVER_ROACH
 
 def get_server():
@@ -47,28 +49,15 @@ def get_listfiles(id: int):
         return data
     return dict()
 
-def get_file(id: int, number: int): #(filename, file)
-    """
-    Функция получения списка файлов
-    id: необходим
-    """
-    # todo: добавить сюда выкачку файла
-    # with open(file, 'rb') as tmp:
-    # obj = BytesIO(tmp.read())
-    # obj.name = '1.txt'
-
-    files = get_listfiles(id)
-    keys = files.keys()
-    if len(keys) == 0 :
+def get_file(fullfilename: str): # -> file
+    myfullfilename = 'http:' + fullfilename if fullfilename.startswith('//') else fullfilename
+    r = requests.get(myfullfilename)
+    if r.ok:        
+        return r
+    else:
         return None
-    if number < len(keys) :
-        return None
-    key = keys[number]
-    filepath = files[key]
-    # todo later: download file from php at path 'filepath'
 
-    return (None, None)
-    return ('filenamenotfound', '')
+    
 
 
 def main():
